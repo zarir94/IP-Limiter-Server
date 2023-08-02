@@ -1,6 +1,6 @@
 from flask import Flask, request
 from time import time, sleep
-from thrading import Thread
+from threading import Thread
 
 app=Flask(__name__)
 app.config['SECRET_KEY']='thisIsMySecretKey'
