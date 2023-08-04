@@ -18,7 +18,7 @@ class IPAddress(db.Model):
     timestamp = db.Column(db.Float, nullable=False)
 
 # Create the table if it doesn't exist
-db.create_all()
+with app.app_context(): db.create_all()
 
 @app.route('/')
 def home():
