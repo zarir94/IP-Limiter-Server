@@ -1,2 +1,4 @@
 waitress
 flask
+Flask-SQLAlchemy
+psycopg2
