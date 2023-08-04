@@ -41,13 +41,14 @@ def home():
 
 def background_task():
     while True:
-        # Remove IP addresses that have been stored for more than 24 hours
-        current_time = time()
-        old_ips = IPAddress.query.filter((current_time - IPAddress.timestamp) > (24 * 60 * 60)).all()
+        with app.app_context():
+            # Remove IP addresses that have been stored for more than 24 hours
+            current_time = time()
+            old_ips = IPAddress.query.filter((current_time - IPAddress.timestamp) > (24 * 60 * 60)).all()
 
-        for ip in old_ips:
-            db.session.delete(ip)
-        db.session.commit()
+            for ip in old_ips:
+                db.session.delete(ip)
+            db.session.commit()
         sleep(60 * 30)
 
 t = Thread(target=background_task)
