@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 
 # Replace the database URI with your actual PostgreSQL database URI
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://tztvvsuw:wUGjVSR5Yutc4eIHGHPqmwBRgA_A9Ify@satao.db.elephantsql.com/tztvvsuw'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://tztvvsuw:wUGjVSR5Yutc4eIHGHPqmwBRgA_A9Ify@satao.db.elephantsql.com/tztvvsuw'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize the database
