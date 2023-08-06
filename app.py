@@ -24,7 +24,7 @@ with app.app_context(): db.create_all()
 def home():
     ip = request.args.get('ip')
     if not ip:
-        return "<h1>Insert IP in url parameter as `ip=0.0.0.0`</h1>"
+        return "<h1>Insert IP in url parameter as `ip=0.0.0.0` to endpoints '/isnew' and '/add'</h1>"
 
     # Check if the IP exists in the database
     ip_obj = IPAddress.query.filter_by(ip_address=ip).first()
@@ -38,6 +38,27 @@ def home():
         db.session.add(new_ip)
         db.session.commit()
         return 'true'
+
+@app.route('/isnew')
+def isnew_route():
+    ip = request.args.get('ip')
+    ip_obj = IPAddress.query.filter_by(ip_address=ip).first()
+    if ip_obj:
+        return 'false'
+    else:
+        return 'true'
+
+@app.route('/add')
+def add_route():
+    ip = request.args.get('ip')
+    ip_obj = IPAddress.query.filter_by(ip_address=ip).first()
+    if not ip_obj:
+        timestamp = time()
+        new_ip = IPAddress(ip_address=ip, timestamp=timestamp)
+        db.session.add(new_ip)
+        db.session.commit()
+    return 'true'
+
 
 def background_task():
     while True:
