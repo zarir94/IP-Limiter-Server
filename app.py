@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, make_response
 from time import time, sleep
 from threading import Thread
 from flask_sqlalchemy import SQLAlchemy
@@ -63,7 +63,9 @@ def add_route():
 def used_route():
     with open('ip', 'r') as file:
         text = file.read()
-    return text
+    r = make_response(text, 200)
+    r.mimetype = 'text/plain;charset=UTF-8'
+    return r
 
 
 def background_task():
