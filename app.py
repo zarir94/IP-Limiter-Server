@@ -5,11 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Replace the database URI with your actual PostgreSQL database URI
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://tztvvsuw:wUGjVSR5Yutc4eIHGHPqmwBRgA_A9Ify@satao.db.elephantsql.com/tztvvsuw'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize the database
 db = SQLAlchemy(app)
 
 class IPAddress(db.Model):
@@ -17,26 +15,26 @@ class IPAddress(db.Model):
     ip_address = db.Column(db.String(15), unique=True, nullable=False)
     timestamp = db.Column(db.Float, nullable=False)
 
-# Create the table if it doesn't exist
+
 with app.app_context(): db.create_all()
 
 @app.route('/')
 def home():
     ip = request.args.get('ip')
     if not ip:
-        return "<h1>Insert IP in url parameter as `ip=0.0.0.0` to endpoints '/isnew' and '/add'</h1>"
+        return "<h1>Insert IP in url parameter as `ip=0.0.0.0` to endpoints '/isnew' and '/add' and to see all use '/used'</h1>"
 
-    # Check if the IP exists in the database
     ip_obj = IPAddress.query.filter_by(ip_address=ip).first()
 
     if ip_obj:
         return 'false'
     else:
-        # Insert the IP into the database
         timestamp = time()
         new_ip = IPAddress(ip_address=ip, timestamp=timestamp)
         db.session.add(new_ip)
         db.session.commit()
+        with open('ip', 'a+') as file:
+            file.write(ip + '\n')
         return 'true'
 
 @app.route('/isnew')
@@ -57,13 +55,20 @@ def add_route():
         new_ip = IPAddress(ip_address=ip, timestamp=timestamp)
         db.session.add(new_ip)
         db.session.commit()
+        with open('ip', 'a+') as file:
+            file.write(ip + '\n')
     return 'true'
+
+@app.route('/used')
+def used_route():
+    with open('ip', 'r') as file:
+        text = file.read()
+    return text
 
 
 def background_task():
     while True:
         with app.app_context():
-            # Remove IP addresses that have been stored for more than 24 hours
             current_time = time()
             old_ips = IPAddress.query.filter((current_time - IPAddress.timestamp) > (24 * 60 * 60)).all()
 
@@ -72,9 +77,23 @@ def background_task():
             db.session.commit()
         sleep(60 * 30)
 
-t = Thread(target=background_task)
-t.daemon = True
-t.start()
+def background_task2():
+    while True:
+        with open('ip', 'w') as file:
+            with app.app_context():
+                all_ip = IPAddress.query.all()
+                for ip in all_ip:
+                    file.write(ip.ip_address + '\n')
+        sleep(60 * 15)
+
+
+t1 = Thread(target=background_task)
+t1.daemon = True
+t1.start()
+
+t2 = Thread(target=background_task2)
+t2.daemon = True
+t2.start()
 
 if __name__ == '__main__':
     app.run('0.0.0.0', 80, True)
