@@ -18,11 +18,13 @@ class IPAddress(db.Model):
 
 with app.app_context(): db.create_all()
 
+data={'duplicate':0}
+
 @app.route('/')
 def home():
     ip = request.args.get('ip')
     if not ip:
-        return "<h1>Insert IP in url parameter as `ip=0.0.0.0` to endpoints '/isnew' and '/add' and to see all use '/used'</h1>"
+        return f"<h1>Insert IP in url parameter as `ip=0.0.0.0` to endpoints '/isnew' and '/add' and to see all use '/used' and to remove one use '/del'</h1><br><br><h3>duplicate: {data['duplicate']}</h3>"
 
     ip_obj = IPAddress.query.filter_by(ip_address=ip).first()
 
@@ -57,6 +59,21 @@ def add_route():
         db.session.commit()
         with open('ip', 'a+') as file:
             file.write(ip + '\n')
+    else:
+        data['duplicate']+=1
+    return 'true'
+
+@app.route('/del')
+def delete_route():
+    ip = request.args.get('ip')
+    ip_obj = IPAddress.query.filter_by(ip_address=ip).first()
+    if ip_obj:
+        db.session.delete(ip_obj)
+        db.session.commit()
+    with open('ip', 'r') as file:
+        file_content = file.read()
+    with open('ip', 'w') as file:
+        file.write(file_content.replace(f'{ip}\n',''))
     return 'true'
 
 @app.route('/used')
