@@ -18,7 +18,7 @@ class IPAddress(db.Model):
 
 with app.app_context(): db.create_all()
 
-data={'duplicate':0}
+data={'duplicate':0,'log':''}
 
 @app.route('/')
 def home():
@@ -84,26 +84,35 @@ def used_route():
     r.mimetype = 'text/plain;charset=UTF-8'
     return r
 
+@app.route('/log')
+def log_route():
+    return data['log'].replace('\n','<br>')
 
 def background_task():
-    while True:
-        with app.app_context():
-            current_time = time()
-            old_ips = IPAddress.query.filter((current_time - IPAddress.timestamp) > (24 * 60 * 60)).all()
-
-            for ip in old_ips:
-                db.session.delete(ip)
-            db.session.commit()
-        sleep(60 * 30)
+    try:
+        while True:
+            with app.app_context():
+                current_time = time()
+                old_ips = IPAddress.query.filter((current_time - IPAddress.timestamp) > (24 * 60 * 60)).all()
+    
+                for ip in old_ips:
+                    db.session.delete(ip)
+                db.session.commit()
+            sleep(60 * 30)
+    except Exception as err:
+        data['log']+= f'Error at task 1, ip deletion:\n{err}\n\n\n'
 
 def background_task2():
-    while True:
-        with open('ip', 'w') as file:
-            with app.app_context():
-                all_ip = IPAddress.query.all()
-                for ip in all_ip:
-                    file.write(ip.ip_address + '\n')
-        sleep(60 * 15)
+    try:
+        while True:
+            with open('ip', 'w') as file:
+                with app.app_context():
+                    all_ip = IPAddress.query.all()
+                    for ip in all_ip:
+                        file.write(ip.ip_address + '\n')
+            sleep(60 * 15)
+    except Exception as err:
+        data['log']+=f'Error at task 2, ip importing:\n{err}\n\n\n'
 
 
 t1 = Thread(target=background_task)
