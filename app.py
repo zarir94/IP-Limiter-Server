@@ -24,7 +24,7 @@ data={'duplicate':0,'log':''}
 def home():
     ip = request.args.get('ip')
     if not ip:
-        return f"<h1>Insert IP in url parameter as `ip=0.0.0.0` to endpoints '/isnew' and '/add' and to see all use '/used' and to remove one use '/del'</h1><br><br><h3>duplicate: {data['duplicate']}</h3>"
+        return f"<title>Ip Limiter Server v3.5</title><h1>Insert IP in url parameter as `ip=0.0.0.0` to endpoints '/isnew' and '/add' and to see all use '/used' and to remove one use '/del'</h1><br><br><h3>duplicate: {data['duplicate']}</h3>"
 
     ip_obj = IPAddress.query.filter_by(ip_address=ip).first()
 
@@ -98,7 +98,7 @@ def background_task():
                 for ip in old_ips:
                     db.session.delete(ip)
                 db.session.commit()
-            sleep(60 * 30)
+            sleep(60 * 10)
     except Exception as err:
         data['log']+= f'Error at task 1, ip deletion:\n{err}\n\n\n'
 
@@ -110,7 +110,7 @@ def background_task2():
                     all_ip = IPAddress.query.all()
                     for ip in all_ip:
                         file.write(ip.ip_address + '\n')
-            sleep(60 * 15)
+            sleep(60 * 5)
     except Exception as err:
         data['log']+=f'Error at task 2, ip importing:\n{err}\n\n\n'
 
